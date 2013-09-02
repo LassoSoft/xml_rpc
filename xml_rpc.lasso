@@ -173,7 +173,7 @@ define XMLRPC_XMLInConverter(xml) => {
     /match
 }
 
-define XMLRPC_InConverter(bytes::bytes) => {
+define XMLRPC_InConverter(bytes::bytes, enc::string) => {
     local('xml'=xml(#bytes))
     return XMLRPC_XMLInConverter(#xml)
 }
@@ -205,8 +205,8 @@ define xml_rpc => type {
 
             local('xmlparams' = #xml->extract('/methodCall/params/param/value/*'))
             iterate(#xmlparams, local('i'))
-                local( 'j' = bytes)
-                #j->importstring( #i)
+                local('j' = bytes)
+                #j->importstring(string(#i))
                 self->'params'->insert(XMLRPC_InConverter(#j, 'UTF-8'))
             /iterate
         /if
@@ -234,7 +234,7 @@ define xml_rpc => type {
             #ret->append('<fault>')
             local('code'=0, 'string'=string)
             iterate(self->'params', local('i'))
-                if(#i->isa('pair'))
+                if(#i->isa(::pair))
                     if(#i->first == '-faultcode')
                         #code = integer(#i->second)
                     else(#i->first == '-faultstring')
@@ -267,7 +267,7 @@ define xml_rpc => type {
         return #ret
     }
 
-    public call(-uri, -method) => {
+    public call(uri::string, method::string) => {
         self->'method' = #method
 
         local('req' = "<?xml version='1.0' ?><methodCall><methodName>" +#method+ "</methodName><params>")
@@ -296,7 +296,7 @@ define xml_rpc => type {
             if (#i->nodetype == 'ELEMENT_NODE')
                 local('bytes' = bytes)
                 #bytes->importString(#i->asString)
-                self->'params'->insert(XMLRPC_InConverter(#bytes))
+                self->'params'->insert(XMLRPC_InConverter(#bytes, 'UTF-8'))
             else
                 self->'params'->insert(string(#i))
             /if
@@ -307,7 +307,7 @@ define xml_rpc => type {
 
 define xml_rpccall(params = void, method = void, host = void, url = void, uri = void, ...) => {
     local(myparams = null)
-    local(return = null)
+    local('return' = null)
     if(local_defined('uri'))
         local(myhost = #uri)
     else(local_defined('url'))
@@ -323,10 +323,10 @@ define xml_rpccall(params = void, method = void, host = void, url = void, uri = 
         local(mymethod = 'test.echo')
     /if
     if(local_defined('params'))
-        if(#params->isa('array'))
+        if(#params->isa(::array))
             #myparams = #params
         else
-            #myparams = array + #params
+            #myparams = array(#params)
         /if
     else
         #myparams = array
@@ -334,13 +334,13 @@ define xml_rpccall(params = void, method = void, host = void, url = void, uri = 
     error_seterrorcode(0)
     error_seterrormessage('')
     protect
-        local(return = xml_rpc(#myparams)->call(-uri = local(myhost), -method = #mymethod))
+        #return = xml_rpc(#myparams)->call(-uri = #myhost, -method = #mymethod)
         handle_error
-            return
+            return 'could not execute xml_rpc->call method in xml_rpccall'
         /handle_error
     /protect
     if(#return == array)
-        return
+        return #return
     else(#return->type == 'array' && #return->size == 1)
         return #return->get(1)
     else
