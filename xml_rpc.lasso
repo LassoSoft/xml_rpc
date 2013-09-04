@@ -269,6 +269,7 @@ define xml_rpc => type {
 
     public call(uri::string, method::string) => {
         self->'method' = #method
+        local(host = string)
 
         local('req' = "<?xml version='1.0' ?><methodCall><methodName>" +#method+ "</methodName><params>")
         iterate(self->'params', local('i'))
@@ -279,9 +280,19 @@ define xml_rpc => type {
 
         #req->append('</params></methodCall>')
 
+        // parse the uri to grab the host in case it is local
+        // TODO needs better validation on the #uri
+        protect => {
+            #host = #uri->split('://')->get(2)->split('/')->get(1)
+            handle_error => {
+                return 'not a valid uri'
+            }
+        }
+
         local('result' = include_url(
             #uri,
             -postparams=#req,
+            -options=(#host != '' ? array(-H=('Host: ' + #host))),
             -SendMIMEHeaders=array(
                 'Content-Type'='text/xml',
                 'User-Agent'='Lasso Professional ' + Lasso_Version(-LassoVersion))))
