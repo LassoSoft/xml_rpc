@@ -1,4 +1,3 @@
-[
 /*
 local:'sample'="<?xml version='1.0' ?>
 <methodCall>
@@ -368,4 +367,3 @@ define xml_rpccall(params = void, method = void, host = void, url = void, uri = 
 
 //var: 'test' = (XML_RPCCall: -Host='http://beta-test.kreditor.se:4567', -Method='get_addresses', -Params=$kreditorarray);
 //var: 'test';
-]
