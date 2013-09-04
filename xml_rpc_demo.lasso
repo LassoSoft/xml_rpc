@@ -1,4 +1,4 @@
-[include('/xml_rpc.lasso')]<!DOCTYPE html>
+[sys_listtypes !>> 'xml_rpc' ? include('/xml_rpc.lasso')]<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
