@@ -334,7 +334,7 @@ define xml_rpccall(params = void, method = void, host = void, url = void, uri = 
     error_seterrorcode(0)
     error_seterrormessage('')
     protect
-        #return = xml_rpc(#myparams)->call(-uri = #myhost, -method = #mymethod)
+        #return = xml_rpc(#myparams)->call(#myhost, #mymethod)
         handle_error
             return 'could not execute xml_rpc->call method in xml_rpccall'
         /handle_error
