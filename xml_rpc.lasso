@@ -146,25 +146,25 @@ define XMLRPC_XMLInConverter(xml) => {
             return #ret
         case('struct')
             local('ret'=map)
-            iterate( #xml->children, local( 'member'))
+            iterate( #xml->childnodes, local( 'member'))
                 local( 'nm' = null)
                 local( 'vl' = null)
-                iterate( #member->children, local( 'child'))
-                    if( (#child->nodetype == 'ELEMENT_NODE') && (#child->name == 'name'))
-                        local( 'nm' = #child->contents)
-                    else( (#child->nodetype == 'ELEMENT_NODE') && (#child->name == 'value'))
+                iterate( #member->childnodes, local( 'child'))
+                    if( (#child->nodetype == 'ELEMENT_NODE') && (#child->tagName == 'name'))
+                        #nm = #child->contents
+                    else( (#child->nodetype == 'ELEMENT_NODE') && (#child->tagName == 'value'))
                         iterate( #child->extract('*'), local( 'value'))
                             if( #value->nodetype == 'ELEMENT_NODE')
-                                local( 'vl' = XMLRPC_XMLInConverter(#value))
+                                #vl = XMLRPC_XMLInConverter(#value)
                             else
-                                local( 'vl' = string(#value->contents))
+                                #vl = string(#value->contents)
                             /if
                             loop_abort
                         /iterate
                     /if
                 /iterate
-                if( #nm != null && #vl != null)
-                    #ret->insert( #nm=#vl)
+                if(#nm != null && #vl != null)
+                    #ret->insert(#nm = #vl)
                 /if
             /iterate
             return #ret
