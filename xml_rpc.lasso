@@ -44,7 +44,8 @@ define XMLRPC_ExConverter(type) => {
     match(#type->type)
         case('string')
             #ret->importString('<string>')
-            #ret->importString(#type)//->encodeHtml)
+//            #ret->importString(#type)//->encodeHtml)
+            #ret->append(#type->encodexml)
             #ret->importString('</string>')
         case('bytes')
             #ret->importString('<base64>')
@@ -157,7 +158,7 @@ define XMLRPC_XMLInConverter(xml) => {
                             if( #value->nodetype == 'ELEMENT_NODE')
                                 #vl = XMLRPC_XMLInConverter(#value)
                             else
-                                #vl = string(#value->contents)
+                                #vl = #value->contents
                             /if
                             loop_abort
                         /iterate
