@@ -1,3 +1,4 @@
+[
 /*
 local:'sample'="<?xml version='1.0' ?>
 <methodCall>
@@ -43,7 +44,8 @@ define XMLRPC_ExConverter(type) => {
     match(#type->type)
         case('string')
             #ret->importString('<string>')
-            #ret->importString(#type)//->encodeHtml)
+//            #ret->importString(#type)//->encodeHtml)
+            #ret->append(#type->encodexml)
             #ret->importString('</string>')
         case('bytes')
             #ret->importString('<base64>')
@@ -145,25 +147,25 @@ define XMLRPC_XMLInConverter(xml) => {
             return #ret
         case('struct')
             local('ret'=map)
-            iterate( #xml->children, local( 'member'))
+            iterate( #xml->childnodes, local( 'member'))
                 local( 'nm' = null)
                 local( 'vl' = null)
-                iterate( #member->children, local( 'child'))
-                    if( (#child->nodetype == 'ELEMENT_NODE') && (#child->name == 'name'))
-                        local( 'nm' = #child->contents)
-                    else( (#child->nodetype == 'ELEMENT_NODE') && (#child->name == 'value'))
+                iterate( #member->childnodes, local( 'child'))
+                    if( (#child->nodetype == 'ELEMENT_NODE') && (#child->tagName == 'name'))
+                        #nm = #child->contents
+                    else( (#child->nodetype == 'ELEMENT_NODE') && (#child->tagName == 'value'))
                         iterate( #child->extract('*'), local( 'value'))
                             if( #value->nodetype == 'ELEMENT_NODE')
-                                local( 'vl' = XMLRPC_XMLInConverter(#value))
+                                #vl = XMLRPC_XMLInConverter(#value)
                             else
-                                local( 'vl' = string(#value->contents))
+                                #vl = #value->contents
                             /if
                             loop_abort
                         /iterate
                     /if
                 /iterate
-                if( #nm != null && #vl != null)
-                    #ret->insert( #nm=#vl)
+                if(#nm != null && #vl != null)
+                    #ret->insert(#nm = #vl)
                 /if
             /iterate
             return #ret
@@ -367,3 +369,5 @@ define xml_rpccall(params = void, method = void, host = void, url = void, uri = 
 
 //var: 'test' = (XML_RPCCall: -Host='http://beta-test.kreditor.se:4567', -Method='get_addresses', -Params=$kreditorarray);
 //var: 'test';
+//var: 'test';
+]
